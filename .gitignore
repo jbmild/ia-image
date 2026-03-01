@@ -9,6 +9,14 @@ comfyui_storage/custom_nodes/
 # Logs
 *.log
 
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
 # OS
 .DS_Store
 Thumbs.db

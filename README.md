@@ -14,34 +14,51 @@ Configuración de LTX-Video usando ComfyUI en Docker para generar videos a parti
 
 #### Instalar Python y pip en WSL2
 
-Si Python o pip no están instalados, ejecuta:
+**⚠️ IMPORTANTE:** Ubuntu 24.04 usa entornos gestionados externamente. Debes usar un **entorno virtual** para instalar paquetes Python.
 
+**Opción 1: Script automático (Recomendado)**
 ```bash
-# Opción 1: Usar el script automático (Recomendado)
+# Este script crea un entorno virtual e instala todo automáticamente
 ./install_python_pip.sh
+```
 
-# Opción 2: Instalación manual
+**Opción 2: Crear entorno virtual manualmente**
+```bash
+# 1. Instalar Python y herramientas necesarias
 sudo apt-get update
-sudo apt-get install -y python3 python3-pip python3-venv
+sudo apt-get install -y python3 python3-pip python3-venv python3-full
 
-# Actualizar pip
-python3 -m pip install --upgrade pip --user
+# 2. Crear entorno virtual
+python3 -m venv venv
+
+# 3. Activar el entorno virtual
+source venv/bin/activate
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
 ```
 
-**Nota:** En Ubuntu/WSL2, usa `pip3` en lugar de `pip`, o crea un alias:
+**Opción 3: Script rápido de entorno virtual**
 ```bash
-echo "alias pip='pip3'" >> ~/.bashrc
-source ~/.bashrc
+./setup_venv.sh
 ```
 
-#### Instalar dependencias del proyecto
+#### Usar el entorno virtual
 
-**Para usar `download_models.py` (Recomendado):**
+**Cada vez que quieras usar los scripts Python, activa el entorno virtual:**
 ```bash
-pip3 install -r requirements.txt
-# O manualmente:
-pip3 install huggingface_hub>=0.20.0 tqdm>=4.66.0
+# Activar entorno virtual
+source venv/bin/activate
+
+# Ahora puedes usar pip y python normalmente
+pip install huggingface_hub tqdm
+python download_models.py
+
+# Desactivar cuando termines
+deactivate
 ```
+
+**Nota:** El entorno virtual se crea en `./venv/` y contiene todas las dependencias del proyecto.
 
 **Para usar `download_models.sh`:**
 ```bash
@@ -130,11 +147,14 @@ Se incluyen scripts para descargar automáticamente todos los modelos necesarios
 
 **Usando Python (Recomendado):**
 ```bash
-# Instalar dependencias
-pip install -r requirements.txt
+# 1. Activar entorno virtual (si no está activo)
+source venv/bin/activate
 
-# Ejecutar script de descarga
+# 2. Ejecutar script de descarga
 python download_models.py
+
+# 3. Desactivar entorno virtual cuando termines
+deactivate
 ```
 
 **Usando Bash:**
@@ -204,6 +224,8 @@ casamiento-daiana/
 ├── download_models.sh           # Script Bash alternativo
 ├── check_dependencies.sh        # Script para verificar dependencias
 ├── install_python_pip.sh        # Script para instalar Python y pip en WSL2
+├── setup_venv.sh                # Script rápido para crear entorno virtual
+├── venv/                        # Entorno virtual (se crea al ejecutar setup)
 └── comfyui_storage/
     ├── models/
     │   ├── diffusion_models/    # Modelo LTX-Video aquí
@@ -229,16 +251,22 @@ casamiento-daiana/
 - Verifica los logs: `docker compose logs comfyui`
 - Asegúrate de que el puerto 8188 no esté en uso: `netstat -tuln | grep 8188`
 
-### Error: pip no funciona o no está instalado
-- **En WSL2/Ubuntu, usa `pip3` en lugar de `pip`**
-- Instala pip: `sudo apt-get install python3-pip`
-- O ejecuta el script: `./install_python_pip.sh`
-- Si `pip` no funciona pero `pip3` sí, crea un alias:
+### Error: pip no funciona o "externally-managed-environment"
+- **Ubuntu 24.04 requiere usar un entorno virtual**
+- Solución rápida: `./setup_venv.sh` (crea y configura el entorno virtual)
+- O manualmente:
   ```bash
-  echo "alias pip='pip3'" >> ~/.bashrc
-  source ~/.bashrc
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
   ```
-- Verifica la instalación: `python3 -m pip --version`
+- **IMPORTANTE:** Siempre activa el entorno virtual antes de usar pip:
+  ```bash
+  source venv/bin/activate  # Activar
+  pip install ...          # Usar pip
+  deactivate                # Desactivar cuando termines
+  ```
+- Si necesitas instalar python3-venv: `sudo apt-get install python3-venv python3-full`
 
 ## Recursos Adicionales
 

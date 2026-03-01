@@ -32,9 +32,26 @@ else
     sudo apt-get install -y python3-pip
 fi
 
-# Actualizar pip a la última versión
-echo -e "\n${BLUE}Actualizando pip a la última versión...${NC}"
-python3 -m pip install --upgrade pip --user
+# Instalar python3-full (necesario para crear entornos virtuales)
+if ! dpkg -l | grep -q python3-full; then
+    echo -e "\n${BLUE}Instalando python3-full (necesario para entornos virtuales)...${NC}"
+    sudo apt-get install -y python3-full python3-venv
+fi
+
+# Crear entorno virtual si no existe
+VENV_DIR="./venv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo -e "\n${BLUE}Creando entorno virtual en ./venv...${NC}"
+    python3 -m venv "$VENV_DIR"
+    echo -e "${GREEN}✓${NC} Entorno virtual creado"
+else
+    echo -e "\n${GREEN}✓${NC} Entorno virtual ya existe"
+fi
+
+# Activar entorno virtual y actualizar pip
+echo -e "\n${BLUE}Actualizando pip en el entorno virtual...${NC}"
+source "$VENV_DIR/bin/activate"
+python -m pip install --upgrade pip
 
 # Verificar instalación
 echo -e "\n${BLUE}=== Verificación ===${NC}\n"
@@ -57,23 +74,35 @@ else
     exit 1
 fi
 
-# Crear alias para pip (opcional)
-if ! command -v pip &> /dev/null; then
-    echo -e "\n${BLUE}Creando alias 'pip' para 'pip3'...${NC}"
-    echo "alias pip='pip3'" >> ~/.bashrc
-    echo -e "${GREEN}✓${NC} Alias creado. Ejecuta 'source ~/.bashrc' o reinicia la terminal"
+# Instalar dependencias del proyecto en el entorno virtual
+if [ -f "requirements.txt" ]; then
+    echo -e "\n${BLUE}Instalando dependencias del proyecto...${NC}"
+    pip install -r requirements.txt
+    echo -e "${GREEN}✓${NC} Dependencias instaladas"
+else
+    echo -e "\n${YELLOW}⚠${NC} requirements.txt no encontrado, instalando dependencias básicas..."
+    pip install huggingface_hub tqdm
 fi
 
+# Desactivar entorno virtual
+deactivate
+
 echo -e "\n${BLUE}============================================================${NC}"
-echo -e "${GREEN}✅ Python y pip instalados correctamente${NC}"
+echo -e "${GREEN}✅ Python, pip y dependencias instalados correctamente${NC}"
 echo -e "${BLUE}============================================================${NC}\n"
 
+echo -e "${BLUE}📝 IMPORTANTE: Usa el entorno virtual para ejecutar scripts${NC}\n"
+
 echo -e "${BLUE}Próximos pasos:${NC}"
-echo "  1. Instalar dependencias del proyecto:"
-echo "     ${YELLOW}pip3 install -r requirements.txt${NC}"
+echo "  1. Activar el entorno virtual antes de usar los scripts:"
+echo "     ${YELLOW}source venv/bin/activate${NC}"
 echo ""
-echo "  2. O instalar manualmente:"
-echo "     ${YELLOW}pip3 install huggingface_hub tqdm${NC}"
+echo "  2. Ejecutar el script de descarga de modelos:"
+echo "     ${YELLOW}python download_models.py${NC}"
 echo ""
-echo "  3. Verificar instalación:"
-echo "     ${YELLOW}./check_dependencies.sh${NC}"
+echo "  3. Para desactivar el entorno virtual:"
+echo "     ${YELLOW}deactivate${NC}"
+echo ""
+echo -e "${YELLOW}💡 Tip:${NC} El entorno virtual está en ./venv/"
+echo -e "   Puedes activarlo automáticamente añadiendo a ~/.bashrc:"
+echo -e "   ${YELLOW}echo 'cd $(pwd) && source venv/bin/activate' >> ~/.bashrc${NC}"
