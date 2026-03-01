@@ -1,0 +1,14 @@
+# ComfyUI storage (modelos y outputs pueden ser muy grandes)
+comfyui_storage/models/
+comfyui_storage/output/
+comfyui_storage/custom_nodes/
+
+# Docker
+.docker/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

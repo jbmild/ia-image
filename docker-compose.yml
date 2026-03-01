@@ -1,0 +1,22 @@
+services:
+  comfyui:
+    image: ghcr.io/ai-dock/comfyui:latest-cuda
+    container_name: comfyui_ltx
+    ports:
+      - "8188:8188"
+    volumes:
+      # Mapea los modelos y outputs a tu disco local para no perderlos
+      - ./comfyui_storage/models:/workspace/ComfyUI/models
+      - ./comfyui_storage/output:/workspace/ComfyUI/output
+      - ./comfyui_storage/custom_nodes:/workspace/ComfyUI/custom_nodes
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      # Asegura que la interfaz sea accesible desde tu host Windows
+      - CLI_ARGS=--listen 0.0.0.0
+    restart: unless-stopped
